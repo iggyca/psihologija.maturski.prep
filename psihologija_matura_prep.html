@@ -1,0 +1,444 @@
+
+<h2 class="sr-only">Interaktivna priprema za maturu iz psihologije – teze, sažeci i kviz po oblastima</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{padding:1rem 0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1rem}
+.tab{padding:7px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-size:14px;color:var(--color-text-secondary);transition:all .15s}
+.tab.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
+.tab:hover:not(.active){background:var(--color-background-secondary)}
+.panel{display:none}.panel.active{display:block}
+.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem}
+.area-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;cursor:pointer;transition:border-color .15s}
+.area-card:hover{border-color:var(--color-border-secondary)}
+.area-card.open{border-color:var(--color-border-info)}
+.area-title{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
+.area-sub{font-size:12px;color:var(--color-text-secondary)}
+.area-pct{font-size:12px;font-weight:500;color:var(--color-text-info);margin-top:6px}
+.teze{display:none;margin-top:12px;border-top:0.5px solid var(--color-border-tertiary);padding-top:12px}
+.area-card.open .teze{display:block}
+.teze h4{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.teze ul{padding-left:1.2rem}
+.teze li{font-size:13px;color:var(--color-text-primary);line-height:1.7;margin-bottom:2px}
+.teze .key{font-weight:500;color:var(--color-text-info)}
+.quiz-wrap{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.quiz-header h3{font-size:16px;font-weight:500}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.5rem}
+.progress-fill{height:100%;background:var(--color-border-info);border-radius:2px;transition:width .3s}
+.q-num{font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px}
+.q-text{font-size:15px;line-height:1.6;margin-bottom:1.25rem;color:var(--color-text-primary)}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{padding:10px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:all .15s}
+.opt:hover:not(:disabled){background:var(--color-background-secondary)}
+.opt.correct{background:var(--color-background-success);border-color:var(--color-border-success);color:var(--color-text-success)}
+.opt.wrong{background:var(--color-background-danger);border-color:var(--color-border-danger);color:var(--color-text-danger)}
+.feedback{margin-top:1rem;padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--color-background-success);color:var(--color-text-success)}
+.feedback.nok{background:var(--color-background-danger);color:var(--color-text-danger)}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
+.btn{padding:8px 20px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
+.score-box{text-align:center;padding:2rem}
+.score-big{font-size:48px;font-weight:500;color:var(--color-text-info)}
+.score-label{font-size:14px;color:var(--color-text-secondary);margin-top:4px;margin-bottom:1.5rem}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{padding:5px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary)}
+.filter-btn.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info)}
+.area-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:8px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+</style>
+
+<div class="app">
+<div class="tabs">
+  <button class="tab active" onclick="showTab('pregled')">Pregled oblasti</button>
+  <button class="tab" onclick="showTab('kviz')">Kviz</button>
+  <button class="tab" onclick="showTab('kljucni')">Ključni pojmovi</button>
+</div>
+
+<div id="pregled" class="panel active">
+  <div class="area-grid" id="areaGrid"></div>
+</div>
+
+<div id="kviz" class="panel">
+  <div style="margin-bottom:1rem">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" onclick="setFilter('sve',this)">Sve oblasti</button>
+      <button class="filter-btn" onclick="setFilter('I',this)">I Predmet i metode</button>
+      <button class="filter-btn" onclick="setFilter('II',this)">II Osnove</button>
+      <button class="filter-btn" onclick="setFilter('III',this)">III Psihički procesi</button>
+      <button class="filter-btn" onclick="setFilter('IV',this)">IV Ličnost</button>
+      <button class="filter-btn" onclick="setFilter('V',this)">V Pojedinac u grupi</button>
+    </div>
+  </div>
+  <div class="quiz-wrap" id="quizWrap">
+    <div class="quiz-header">
+      <h3>Kviz za maturu</h3>
+      <button class="btn" onclick="startQuiz()">Novi kviz</button>
+    </div>
+    <div id="quizContent">
+      <div style="text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px">
+        Klikni "Novi kviz" ili odaberi oblast i pokreni kviz.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="kljucni" class="panel">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px" id="glossaryGrid"></div>
+</div>
+</div>
+
+<script>
+const OBLASTI = [
+  {
+    id:'I', naziv:'Predmet i metode psihologije', pct:'10%',
+    sub:'Definicija, pravci, metode istraživanja',
+    teze:[
+      {h:'Predmet psihologije', items:[
+        'Psihologija = nauka o psihičkom životu (procesima, stanjima, osobinama)',
+        'Pravci: <span class="key">strukturalizam</span> (Vunt – sadržaji svijesti), <span class="key">funkcionalizam</span> (Džejms), <span class="key">bihejviorizam</span> (Votson – ponašanje), <span class="key">geštaltizam</span> (cjelina > suma dijelova), <span class="key">psihoanaliza</span> (Frojd – nesvjesno), <span class="key">humanizam</span> (Maslov, Rodžers)',
+        'Teorijske discipline: opšta, razvojna, socijalna, diferencijalna psihologija',
+        'Primjenjene discipline: klinička, pedagoška, forenzička, psihologija rada'
+      ]},
+      {h:'Metode', items:[
+        '<span class="key">Posmatranje</span>: spoljašnje (objektivno) i introspekcija (subjektivno, jedinstven psihološki metod)',
+        '<span class="key">Eksperiment</span>: NV (nezavisna var.) → ZV (zavisna var.), kontrolisani uslovi; nedostaci: vještačka situacija, etička ograničenja',
+        '<span class="key">Upitnik</span>: ekonomičan, kvantitativ, anoniman; nedostatak: nema prat. neverbalnog',
+        '<span class="key">Intervju</span>: praćenje neverbalnog, pojašnjenje pitanja, nova saznanja; manje ekonomičan',
+        '<span class="key">Test</span>: pouzdanost, valjanost, osjetljivost, objektivnost',
+        'Studija slučaja, sociometrija, analiza sadržaja'
+      ]}
+    ]
+  },
+  {
+    id:'II', naziv:'Osnove psihičkog života', pct:'10%',
+    sub:'Nervni sistem, endokrini sistem, razvoj',
+    teze:[
+      {h:'Neurobiološke osnove', items:[
+        '<span class="key">Neuron</span>: tijelo (soma) + dendriti + akson; sinapsa = veza između neurona',
+        'NS: centralni (mozak + kičmena moždina) i periferni (somatski + autonomni)',
+        'Autonomni NS: <span class="key">simpatički</span> (mobilizacija – bori se ili bježi) vs <span class="key">parasimpatički</span> (opuštanje)',
+        'Kora velikog mozga: <span class="key">senzorna</span> (primanje), <span class="key">motorička</span> (pokret), <span class="key">asocijativna</span> (mišljenje)',
+        'Lijeva hemisfera: govor, logika, numeričke sp.; Desna: kreativnost, prostorna orijentacija',
+        '<span class="key">Endokrini sistem</span>: žlijezde – hipofiza (upravlja sistemom), nadbubrežna (adrenalin/kortizol – stres)'
+      ]},
+      {h:'Razvoj psihičkog života', items:[
+        '<span class="key">Filogeneza</span> = razvoj vrste; <span class="key">ontogeneza</span> = razvoj jedinke (od začeća do smrti)',
+        'Faktori razvoja: nasljeđe + sazrijevanje + sredina + aktivnost jedinke',
+        '<span class="key">Nativisti</span>: nasljeđe odlučujuće; <span class="key">empiristi</span>: sredina odlučujuća; <span class="key">interakcionisti</span>: interakcija oba',
+        'Senzitivni periodi = kritični intervalii optimalnog razvoja (npr. govor 2–6 g.)'
+      ]}
+    ]
+  },
+  {
+    id:'III', naziv:'Psihički procesi', pct:'25%',
+    sub:'Opažanje, učenje, pamćenje, mišljenje, inteligencija, emocije, motivacija, stres',
+    teze:[
+      {h:'Opažanje i pažnja', items:[
+        'Draž → osjet → opažaj (percepcija); Konstantnost opažaja (vrata su vrata u svakom položaju)',
+        'Pragovi: donji, diferencijalni, gornji; senzorna deprivacija, adaptacija',
+        'Gestalt zakoni: figura-pozadina, blizina, sličnost, zatvorenost, pregnantnost',
+        'Unutrašnji činioci opažanja: motivacija, emocije, iskustvo (npr. gladni brže opažamo hranu)',
+        '<span class="key">Iluzije</span> = pogrešno opažanje; <span class="key">halucinacije</span> = opažanje bez draži',
+        'Pažnja: obim, fluktuacija; činioci – intenzitet, novost, interes'
+      ]},
+      {h:'Učenje', items:[
+        '<span class="key">Klasično uslovljavanje</span> (Pavlov): NB → NU, UB → UO, a zatim US → UO; generalizacija, diferencijacija, gašenje',
+        '<span class="key">Instrumentalno / operantno</span> (Torndajk, Skiner): zakon efekta – ponašanje potkrijepljeno → ponavlja se; potkrepljenje (+ i –), kazna',
+        '<span class="key">Emocionalno uslovljavanje</span>: brzo nastaje, lako se generalizuje, teško gasi (razlika od klasičnog)',
+        '<span class="key">Učenje po modelu</span> (Bandura): imitacija; istraživanje agresije s lutkom Bobo – TV = isto kao uživo',
+        '<span class="key">Učenje uviđanjem</span> (Keler): naglo rješavanje problema, insight',
+        'Transfer: pozitivni (olakšava), negativni (otežava – vožnja lijeva/desna strana)'
+      ]},
+      {h:'Pamćenje i zaboravljanje', items:[
+        'Senzorno → kratkoročno → dugoročno pamćenje (Atkinson & Šifrin)',
+        'Manifestacije: rekognicija (prepoznavanje), reprodukcija (doslovno), rekonstrukcija (uvođenje novih el.)',
+        'Pamćenje je <span class="key">konstrukcija</span>, ne reprodukcija! (iskustvo, emocije mijenjaju sadržaj)',
+        'Poremećaji: hipermnezija, amnezija (retrogradna / anterogradna), paramnezija',
+        'Ebinghausova krivulja zaboravljanja: brzo zaboravljamo prvog sata',
+        'Teorije zaboravljanja: gašenje traga, retroaktivna / proaktivna inhibicija, potiskivanje',
+        'Za bolji uspjeh: aktivno učenje, raspoređeno u vreme, ponavljanje'
+      ]},
+      {h:'Mišljenje i intelektualne sposobnosti', items:[
+        'Mišljenje u užem smislu = rješavanje problema (situacija nedovoljno definisana)',
+        'Faze rješavanja: uočavanje problema → direkcija → hipoteza → provjera',
+        'Oblici: konkretno↔apstraktno, konvergentno↔divergentno, induktivno↔deduktivno',
+        '<span class="key">Spirman</span>: g-faktor (opšta int.) + s-faktori; <span class="key">Terstoun</span>: 7 primarnih sp.; <span class="key">Gilford</span>: 150 faktora; <span class="key">Gardner</span>: višestruka inteligencija',
+        '<span class="key">Katell</span>: fluidna int. (biološka, vrhunac ~16 g., opada) vs kristalizovana (iskustvo, opada kasno)',
+        'IQ = MU/KU × 100; normalna distribucija; prosj. IQ = 100'
+      ]},
+      {h:'Emocije', items:[
+        'Komponente: fiziološka + ponašajna + doživljajna (subjektivna)',
+        'Primarne (urođene): strah, ljutnja, tuga, sreća, gađenje, iznenađenje; sekundarne = složene',
+        '<span class="key">Džejms–Lange</span>: emocija = svijest o tjelesnim promjenama; <span class="key">Kenon–Bard</span>: istovremeno i tijelo i doživljaj; <span class="key">Šekter–Singer</span>: kognitivna procjena određuje emociju',
+        'Emocionalna inteligencija (EI): samosvijest, empatija, samokontrola, socijalne vještine (≠ egoizam)',
+        'Sentiment = trajan emocionalni odnos prema objektu; afekt = kratkotrajan i intenzivan'
+      ]},
+      {h:'Motivacija, frustracija i stres', items:[
+        'Biološki motivi: homeostatički (glad, žeđ → homeostaza) + nehomeostatički (radoznalost, stimulacija – tenzija ostaje!)',
+        'Socijalni motivi: afilijativnost, postignuće, moć; prosocijalni (altruizam) ↔ antisocijalni (agresija)',
+        '<span class="key">Maslovljeva hijerarhija</span>: fiziološke → sigurnost → ljubav/pripad. → poštovanje → samoaktualizacija',
+        '<span class="key">Frustracija</span>: blokirana motivacija; konstruktivne reakcije (prilagodba, supstitucija) vs nekonstruktivne (agresija, regresija, fiksacija, potiskivanje)',
+        '<span class="key">Konflikt</span>: privlačnost–privlačnost, odbijanje–odbijanje, privlačnost–odbijanje',
+        '<span class="key">Stres</span>: Selje – 3 faze: alarm → otpor → iscrpljenost; strategije: planiranje, socijalna podrška, vježbanje'
+      ]}
+    ]
+  },
+  {
+    id:'IV', naziv:'Ličnost', pct:'25%',
+    sub:'Struktura, teorije, razvoj, dinamika, poremećaji',
+    teze:[
+      {h:'Struktura i procjena ličnosti', items:[
+        'Ličnost = relativno trajne psihičke osobine (crte, temperament, karakter)',
+        '<span class="key">Temperament</span>: kolerik (plahovit), sangvinik (veseo, brzih slabih emocija), melanholik (spor, tužan), flegmatik (miran)',
+        '<span class="key">Karakter</span> = moralna strana ličnosti; crte karaktera = stečene',
+        'Ekstraverzija↔introverzija (Jung): libido usmjeren prema vani/unutra',
+        'Procjena: upitnici ličnosti, projektivne tehnike (Rorschach, TAT) – nesvjesni sadržaji, indirektna pitanja'
+      ]},
+      {h:'Teorije ličnosti', items:[
+        '<span class="key">Frojd (psihoanaliza)</span>: Id (nagon, zadovoljstvo) + Ego (realnost, balans) + Superego (moral, norma); nesvjesno, libido, Edipov kompleks',
+        '<span class="key">Adler</span>: osjećanje inferiornosti → kompenzacija ili prekomjerna kompenzacija',
+        '<span class="key">Jung</span>: kolektivno nesvjesno, arhetipovi, ekstra-/introverzija',
+        '<span class="key">Bihejviorizam</span>: ličnost = zbir naučenih ponašanja (bez nesvjesnog)',
+        '<span class="key">Humanizam (Maslov, Rodžers)</span>: zdrav dio ličnosti, samoaktualizacija, "treća sila"',
+        '<span class="key">From</span>: tipovi društvenog karaktera – primalački (2), sakupljački (4), tržišni (1), izrabljivački (3), produktivni (zdrav)',
+        '<span class="key">Olport</span>: funkcionalna autonomija motiva; crte ličnosti'
+      ]},
+      {h:'Razvoj i zrela ličnost', items:[
+        '<span class="key">Erikson</span>: 8 kriza razvoja; adolescencija = identitet vs difuzija uloga (neuspjeh → nesigurnost, konformizam)',
+        '<span class="key">Pijaže</span>: stadiji kognitivnog razvoja; kriterij zrelosti = razvijeno apst. mišljenje',
+        'Zrela ličnost po Maslovu: samoaktualizacija, kreativnost, autonomija, smisao za humor, empatija, realna slika o sebi (≠ idealna)',
+        'Zrela ličnost po Fromu: produktivni karakter; Frojd: genitalni karakter'
+      ]},
+      {h:'Dinamika i mehanizmi odbrane', items:[
+        'Lični motivi: identitet, ljubav, poštovanje/ugled, postignuće, samopotvrđivanje',
+        'Mehanizmi odbrane (nesvjesni, smanjuju anksioznost): potiskivanje, projekcija, racionalizacija, sublimacija, reaktivna formacija, kompenzacija, regresija',
+        'Reaktivna formacija = suprotno od željenog (nesvjesno); projekcija = pripisivanje drugima'
+      ]},
+      {h:'Normalnost i poremećaji', items:[
+        'Statistički kriterij: prosj. = normalno; psihološki: funkcionisanje, patnja, kontakt s realnošću',
+        'Poremećaji ponašanja: alkoholizam, narkomanija, delinkvencija, patološko kockanje',
+        '<span class="key">Neuroze</span>: lakši, svjestan problema, kontakt s realnošću, anksioznost',
+        '<span class="key">Psihoze</span>: teški, halucinacije, gubitak kontakta s realnošću (npr. shizofrenija)',
+        'Psihosomatski poremećaji: psihičke napetosti → tjelesne bolesti',
+        'Savjetovanje (blaži problemi) vs psihoterapija (teži); pristupi: psihoanalitički, bihejvioristički, humanistički'
+      ]}
+    ]
+  },
+  {
+    id:'V', naziv:'Pojedinac u grupi', pct:'30%',
+    sub:'Socijalna psihologija, stavovi, grupe, rukovođenje, propaganda',
+    teze:[
+      {h:'Socijalizacija i stavovi', items:[
+        'Socijalizacija = usvajanje normi, vrijednosti, uloga; agensi: porodica, škola, vršnjaci, mediji, <span class="key">organizacija</span>',
+        'Oblici soc. učenja: imitacija, identifikacija, internalizacija; uloge utiču na ličnost',
+        '<span class="key">Stavovi</span>: kognitivna + emotivna + konativna komponenta; mijenjaju se – kognitivna disonanca, propaganda',
+        '<span class="key">Predrasude i stereotipi</span>: generalizovani, negativni, otporni na promjenu → diskriminacija, mržnja',
+        '<span class="key">Vrijednosti</span>: opštije i apstraktnije od stavova; moral po Kolbergu (3 nivoa × 2 stadija)',
+        '<span class="key">Pijaže (moral)</span>: heteronomna (strah od kazne, slovo zakona) → autonomna moralnost (namjera, kršenje iz humanih razloga = autonomno)'
+      ]},
+      {h:'Grupe', items:[
+        'Primarne (jaka emocionalna veza: porodica, prijatelji) ↔ sekundarne (formalne: organizacije)',
+        'Strukturirane ↔ nestrukturirane (publika, masa, socijalni pokreti)',
+        'Formalna (propisana) ↔ neformalna struktura; sociometrija mjeri neformalne odnose',
+        'Kohezija = jedinstvenost, privlačnost grupe; norma = pravilo ponašanja (eksplicitna/implicitna)',
+        'Vrste moći: nagrađivanje, prisila, referentna (divljenje), stručnjačka (znanje), legitimna (položaj), informacijska',
+        'Konflikt u grupi: podataka, resursa, vrijednosti, ciljeva; konstruktivno vs nekonstruktivno rješavanje'
+      ]},
+      {h:'Rukovođenje i odlučivanje', items:[
+        'Vođa (neformalni) ↔ rukovodilac (formalni) ↔ glavar (sila)',
+        'Stilovi: <span class="key">demokratski</span> (svi učestvuju, best results), <span class="key">autokratski</span> (vođa sam odlučuje), <span class="key">liberalni</span> (vođa ne miješa se)',
+        'Odlučivanje: glasanje (brzo, može biti 51% vs 49%) ↔ konsenzus (sporije, ali veće prihvatanje)',
+        '<span class="key">Cezarizam</span>: ideja proganjanja, nepogrešivost, kratomanija, nezamjenjivost (≠ dobrodušnost)',
+        'Poltronstvo = bezgranična odanost vođi bez kritičnosti'
+      ]},
+      {h:'Propaganda i masovna ponašanja', items:[
+        'Propaganda: unaprijed smišljena, usmjerena na promjenu stavova/ponašanja; vrste: ekonomska, politička, zdravstvena, vojna',
+        'Dobra poruka: dostupna, privlačna, razumljiva, zanimljiva, <span class="key">uvjerljiva</span>',
+        '<span class="key">Glasine</span>: nepoznat izvor, teško provjeriti; šire se u situaciji anksioznosti',
+        'Masa: broj + gustoća + em. uzbuđenje + usmjerenost pažnje + zajednička akcija',
+        'Oblici: demonstracije (za nešto), manifestacije (za nešto), panika, linč, progon',
+        'Moda = psihosocijalno masovno ponašanje; konformizam, sugestibilnost'
+      ]}
+    ]
+  }
+];
+
+const KVIZ_PITANJA = [
+  {o:'I',p:'Koji psihološki pravac smatra da je predmet psihologije isključivo ponašanje koje se može objektivno posmatrati?',opt:['Psihoanaliza','Bihejviorizam','Geštalt psihologija','Humanizam'],t:1,obj:'Votson i bihejvioristi su smatrali da nauka treba proučavati samo mjerljivo ponašanje, ne unutrašnje doživljaje.'},
+  {o:'I',p:'Koji metod je specifično psihološki jer je predmet i metod istraživanja isti?',opt:['Eksperiment','Upitnik','Introspekcija','Sociometrija'],t:2,obj:'Introspekcija (samoposmatranje) je specifična jer psihički sadržaji mogu biti dostupni samo onome ko ih doživljava.'},
+  {o:'I',p:'Koja karakteristika testa znači da u više navrata daje iste ili slične rezultate?',opt:['Valjanost','Osjetljivost','Pouzdanost','Objektivnost'],t:2,obj:'Pouzdanost = konzistentnost mjerenja kroz vrijeme ili između različitih procjenjivača.'},
+  {o:'I',p:'Koji je glavni nedostatak eksperimenta u odnosu na posmatranje u prirodnim uslovima?',opt:['Nema kontrolnih varijabli','Stvara vještačku situaciju','Ne daje uzročno-posljedične zaključke','Zahtijeva previše ispitanika'],t:1,obj:'Eksperiment se odvija u laboratorijskim ili kontrolisanim uslovima koji često ne odgovaraju realnom životu.'},
+  {o:'II',p:'Koji dio neurona prenosi impulse KA tijelu neurona?',opt:['Akson','Mijelin','Dendriti','Sinapsa'],t:2,obj:'Dendriti primaju signale od drugih neurona i vode ih prema tijelu ćelije (soma).'},
+  {o:'II',p:'Kojom hemisferom dominira prostorna orijentacija i kreativnost?',opt:['Lijevom','Desnom','Obje jednako','Zavisi od pola'],t:1,obj:'Desna hemisfera je superiornija u prostornoj orijentaciji, kreativnosti i prepoznavanju lica.'},
+  {o:'II',p:'Autonomni nervni sistem dijeli se na:',opt:['Centralni i periferni','Somatski i visceralni','Simpatički i parasimpatički','Aferentni i eferentni'],t:2,obj:'Simpatički (mobilizacija – "bori se ili bježi") i parasimpatički (opuštanje i obnova).'},
+  {o:'II',p:'Interakcionistički pristup razvoju smatra:',opt:['Samo nasljeđe je bitno','Samo sredina je bitna','Nasljeđe i sredina djeluju zajedno','Aktivnost jedinke nije važna'],t:2,obj:'Interakcionisti tvrde da se puna slika razvoja ne može razumjeti bez uzajamnog djelovanja bioloških i sredinskih faktora.'},
+  {o:'III',p:'Vrata opažamo kao vrata bez obzira na ugao gledanja. Kako se ova pojava naziva?',opt:['Iluzija opažaja','Konstantnost opažaja','Senzorna adaptacija','Gestalt zakon figure'],t:1,obj:'Konstantnost opažaja: opažamo objekte kao nepromijenjene (veličina, oblik, boja) unatoč promjenama na mrežnjači.'},
+  {o:'III',p:'Pojava da vozači naučeni na vožnju desnom stranom imaju probleme s vožnjom lijevom je primjer:',opt:['Pozitivnog transfera','Negativnog transfera','Retroaktivne inhibicije','Učenja uviđanjem'],t:1,obj:'Negativni transfer: prethodno naučeno ometa usvajanje novog, srodnog sadržaja.'},
+  {o:'III',p:'Zakon efekta na kojem se temelji instrumentalno učenje glasi:',opt:['Ponašanje koje ne donosi nagradu gasi se','Potkrijepljeno ponašanje se ponavlja','Svaka draž izaziva refleks','Učenje nastaje samo posmatranjem modela'],t:1,obj:'Torndajk: ponašanje praćeno ugodnim posljedicama (nagradom) jača se i ponavlja.'},
+  {o:'III',p:'Kenon i Bard smatraju da tjelesne promjene i emocionalni doživljaj:',opt:['Emocija nastaje iz tjelesnih promjena','Kognitivna procjena dolazi prva','Javljaju se istovremeno','Emocionalni doživljaj dovodi do tjelesnih promjena'],t:2,obj:'Teorija Kenona i Barda: talamus šalje signal i u korteks i u tijelo istovremeno – doživljaj i fiziološka reakcija se javljaju paralelno.'},
+  {o:'III',p:'Koja vrsta pamćenja podrazumijeva sjećanje na nešto što se nije dogodilo (lažno sjećanje)?',opt:['Anterogradna amnezija','Retrogradna amnezija','Paramnezija','Hipermnezija'],t:2,obj:'Paramnezija = pogrešno pamćenje, lažna sjećanja. Konfabulacija je njen poseban oblik.'},
+  {o:'III',p:'Fluidna inteligencija se razlikuje od kristalizovane po tome što:',opt:['Više zavisi od obrazovanja','Vrhunac dostiže oko 16. g. i biološki je uslovljena','Obuhvata rječnik i opšte znanje','Opada tek u dubokoj starosti'],t:1,obj:'Fluidna int. (Katell) = biološka osnova, dostizanje vrhunca u adolescenciji, ranije opada. Kristalizovana = iskustvo i učenje, sporije opada.'},
+  {o:'III',p:'Koja karakteristika razlikuje emocionalnu inteligenciju od egoizma?',opt:['Empatija','Egoizam pripada EI','Samokontrola','Samopouzdanje'],t:0,obj:'Egoizam NIJE karakteristika emocionalne inteligencije. EI uključuje empatiju, razumijevanje sebe, samokontrolu, samopouzdanje.'},
+  {o:'III',p:'Potreba za stimulacijom i radoznalošću je specifična jer:',opt:['Nastaje samo kod djece','Zadovoljenjem tenzija ostaje (nehomeostatički motiv)','Brzo se gasi poput gladi','Biološki je identična ostalim biološkim motivima'],t:1,obj:'Za razliku od homeostatičkih motiva (glad, žeđ), zadovoljavanje radoznalosti ne smanjuje tenziju – ona ostaje prisutna.'},
+  {o:'IV',p:'Koji element ličnosti prema Frojdu zastupa princip realnosti i balansira između Ida i Superega?',opt:['Id','Ego','Superego','Libido'],t:1,obj:'Ego radi po principu realnosti – posreduje između nagona Ida i moralnih zahtjeva Superega.'},
+  {o:'IV',p:'Adlerova teorija ličnosti posebno naglašava:',opt:['Kolektivno nesvjesno','Hijerarhiju potreba','Osjećanje inferiornosti i kompenzaciju','Uvjetovana ponašanja'],t:2,obj:'Adler: svaki čovjek ima osjećanje inferiornosti (uočava vlastite mane) i teži kompenzaciji ili prekomp.'},
+  {o:'IV',p:'Prema Jungu, introvertni tip je usmjeren ka:',opt:['Spoljašnjem svijetu, djelovanju','Unutrašnjem svijetu, refleksiji','Socijalnim kontaktima','Agresivnim ispadima'],t:1,obj:'Introvertni: libido usmjeren prema unutra, sklon refleksiji, introspekciji, oprezan u kontaktima.'},
+  {o:'IV',p:'Zrela ličnost po Maslovu NIJE karakterizirana:',opt:['Kreativnošću','Smislom za humor','Idealnom slikom o sebi','Nezavisnošću u mišljenju'],t:2,obj:'Maslov kaže da zrela ličnost ima REALNU (ne idealnu) sliku o sebi – prihvata sebe s manama i vrlinama.'},
+  {o:'IV',p:'Reaktivna formacija kao mehanizam odbrane znači:',opt:['Pripisivanje vlastitih nagona drugima','Ponašanje suprotno od stvarnih željа','Vraćanje na ranije razvojne faze','Opravdavanje neprihvatljivog ponašanja'],t:1,obj:'Reaktivna formacija: osoba postaje nesvjesno suprotna onom što zaista osjeća (npr. agresivna osoba postaje pretjerano nježna).'},
+  {o:'IV',p:'Koja je suštinska razlika između neuroze i psihoze?',opt:['Neuroze su nasljedne, psihoze nisu','U neurozama nema kontakta s realnošću','U psihozi postoje halucinacije i prekid kontakta s realnošću','Neuroze se ne mogu liječiti'],t:2,obj:'Psihoze: teški poremećaji s halucinacijama, sumanošću, gubitkom kontakta s realnošću. Neuroze su lakši oblici uz očuvan kontakt sa stvarnošću.'},
+  {o:'V',p:'Ko spada u agense (posrednike) socijalizacije?',opt:['Genetski kod','Organizacija (škola, firma)','Geografska lokacija','Biološko sazrijevanje'],t:1,obj:'Agensi socijalizacije su konkretni nosioci procesa: porodica, škola, vršnjaci, mediji, organizacije.'},
+  {o:'V',p:'Heteronomna moralnost po Pijažeu karakterizuje:',opt:['Moralno suđenje po namjeri','Kršenje pravila iz humanih razloga','Moralno ponašanje iz straha od kazne','Autonomno donošenje moralnih odluka'],t:2,obj:'Heteronomna (rana) moralnost: pravila su apsolutna, moralno je ono što se ne kažnjava.'},
+  {o:'V',p:'Jaka emocionalna vezanost je karakteristična za:',opt:['Formalne grupe','Sekundarne grupe','Primarne grupe','Organizacije'],t:2,obj:'Primarne grupe (porodica, prijatelji) odlikuju se jakom emocionalnom vezanošću i licem u lice kontaktom.'},
+  {o:'V',p:'Koja vrsta moći se zasniva na tome da se ljudi dive vođi i poistovjećuju s njim?',opt:['Legitimna moć','Stručnjačka moć','Referentna moć','Moć prisile'],t:2,obj:'Referentna moć: osnova je u divljenju i identifikaciji sljedbenika s vođom ("moć karizme").'},
+  {o:'V',p:'Šta od navedenog NIJE karakteristika cezarizma?',opt:['Kratomanija','Nepogrešivost','Dobrodušnost','Nezamjenjivost'],t:2,obj:'Cezarizam uključuje kratomaniju, nepogrešivost, nezamjenjivost i ideje proganjanja. Dobrodušnost mu ne pripada.'},
+  {o:'V',p:'Propaganda se razlikuje od glasine jer je:',opt:['Unaprijed smišljena i ima određen cilj','Spontanog i nepoznatog izvora','Uvijek istinita','Kratkotrajna'],t:0,obj:'Propaganda je namjerna i organizovana komunikacija s ciljem mijenjanja stavova, za razliku od glasina koje nastaju spontano.'},
+  {o:'V',p:'Demokratski stil rukovođenja karakteriše:',opt:['Vođa sam donosi sve odluke','Svi članovi podjednako učestvuju u odlučivanju','Vođa se uopšte ne miješa','Odlučivanje glasanjem bez diskusije'],t:1,obj:'Demokratski stil: vođa stvara uslove za ravnopravno učešće svih članova u donošenju odluka.'},
+  {o:'V',p:'Forma masovnog ponašanja kada masa protestvuje radi loših uslova rada naziva se:',opt:['Panika','Linč','Demonstracija','Moda'],t:2,obj:'Demonstracije = organizovani protest grupe radi iskazivanja nezadovoljstva ili traženja promjena.'}
+];
+
+const POJMOVI = [
+  {p:'Id',o:'IV',d:'Instanca ličnosti (Frojd) koja djeluje po principu zadovoljstva – nesvjesni nagoni i impulsi.'},
+  {p:'Ego',o:'IV',d:'Instanca ličnosti (Frojd) – princip realnosti, balansira Id i Superego.'},
+  {p:'Superego',o:'IV',d:'Moralna instanca ličnosti (Frojd); unutrašnje norme i ideali.'},
+  {p:'Konstantnost opažaja',o:'III',d:'Opažamo objekt kao nepromijenjen bez obzira na kut, udaljenost, osvjetljenje.'},
+  {p:'Instrumentalno učenje',o:'III',d:'Učenje putem posljedica ponašanja (nagrada/kazna) – temelji se na zakonu efekta.'},
+  {p:'Negativni transfer',o:'III',d:'Prethodno naučeno otežava usvajanje novog sličnog sadržaja.'},
+  {p:'Fluidna inteligencija',o:'III',d:'Biološki uslovljena inteligencija; vrhunac ~16. g., ranije opada od kristalizovane.'},
+  {p:'Paramnezija',o:'III',d:'Poremećaj pamćenja – sjećanje na nešto što se nije stvarno dogodilo.'},
+  {p:'Reaktivna formacija',o:'IV',d:'Mehanizam odbrane – osoba se nesvjesno ponaša suprotno od svojih stvarnih želja/osjećanja.'},
+  {p:'Cezarizam',o:'V',d:'Fenomen rukovođenja: kratomanija, nepogrešivost, nezamjenjivost, ideje proganjanja.'},
+  {p:'Referentna moć',o:'V',d:'Moć zasnovana na divljenju i identifikaciji (karizmatska moć).'},
+  {p:'Heteronomna moralnost',o:'V',d:'(Pijaže) Rana moralnost: pravila apsolutna, suđenje po posljedici, a ne namjeri.'},
+  {p:'Emocionalna inteligencija',o:'III',d:'Sposobnost prepoznavanja, razumijevanja i upravljanja emocijama; uključuje empatiju, samokontrolu.'},
+  {p:'Kohezija grupe',o:'V',d:'Jedinstvenost i privlačnost grupe za njene članove; uvjet stabilnog funkcionisanja.'},
+  {p:'Samoaktualizacija',o:'III',d:'(Maslov) Vrh hijerarhije potreba – ostvarivanje punog potencijala ličnosti.'},
+  {p:'Psihoze',o:'IV',d:'Teški duševni poremećaji: halucinacije, sumanute ideje, gubitak kontakta s realnošću.'},
+  {p:'Introspekcija',o:'I',d:'Samoposmatranje – jedini metod direktnog uvida u vlastite psihičke procese; specifično psihološki metod.'},
+  {p:'Arhetipovi',o:'IV',d:'(Jung) Urođeni obrasci iskustva u kolektivnom nesvjesnom (npr. Anima, Sjena, Mudri starac).'},
+  {p:'Gestalt zakoni',o:'III',d:'Principi organizacije opažanja: figura–pozadina, blizina, sličnost, zatvorenost, pregnantnost.'},
+  {p:'Simpatički NS',o:'II',d:'Dio autonomnog NS; aktivira organizam u situaciji opasnosti ("bori se ili bježi").'}
+];
+
+let activeFilter = 'sve';
+let qList = [], qIdx = 0, score = 0, answered = false;
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggleCard(el) {
+  el.classList.toggle('open');
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startQuiz() {
+  let pool = activeFilter === 'sve' ? [...KVIZ_PITANJA] : KVIZ_PITANJA.filter(q=>q.o===activeFilter);
+  pool = pool.sort(()=>Math.random()-0.5).slice(0,10);
+  qList = pool; qIdx = 0; score = 0; answered = false;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if(qIdx >= qList.length) { renderScore(); return; }
+  const q = qList[qIdx];
+  const pct = Math.round((qIdx/qList.length)*100);
+  const oNaziv = OBLASTI.find(o=>o.id===q.o);
+  document.getElementById('quizContent').innerHTML = `
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <span class="area-badge">${oNaziv?oNaziv.naziv:q.o}</span>
+    <div class="q-num">Pitanje ${qIdx+1} od ${qList.length}</div>
+    <div class="q-text">${q.p}</div>
+    <div class="options">
+      ${q.opt.map((o,i)=>`<button class="opt" id="opt${i}" onclick="answer(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-nav">
+      <span style="font-size:13px;color:var(--color-text-secondary)">Rezultat: ${score}/${qIdx}</span>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQ()" style="display:none">Sljedeće →</button>
+    </div>`;
+  answered = false;
+}
+
+function answer(i) {
+  if(answered) return;
+  answered = true;
+  const q = qList[qIdx];
+  const fb = document.getElementById('feedback');
+  document.querySelectorAll('.opt').forEach((b,idx)=>{
+    b.disabled = true;
+    if(idx === q.t) b.classList.add('correct');
+    else if(idx === i && i !== q.t) b.classList.add('wrong');
+  });
+  if(i === q.t) {
+    score++;
+    fb.className = 'feedback show ok';
+    fb.textContent = '✓ Tačno! ' + q.obj;
+  } else {
+    fb.className = 'feedback show nok';
+    fb.textContent = '✗ Netačno. ' + q.obj;
+  }
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQ() { qIdx++; renderQuestion(); }
+
+function renderScore() {
+  const pct = Math.round((score/qList.length)*100);
+  let msg = pct>=80?'Odlično! Spreman/na za maturu!':pct>=60?'Dobro! Još malo vježbe.':'Ponovi gradivo i pokušaj ponovo.';
+  document.getElementById('quizContent').innerHTML = `
+    <div class="score-box">
+      <div class="score-big">${score}/${qList.length}</div>
+      <div class="score-label">${pct}% tačnih · ${msg}</div>
+      <button class="btn btn-primary" onclick="startQuiz()">Novi kviz</button>
+    </div>`;
+}
+
+function buildAreas() {
+  const grid = document.getElementById('areaGrid');
+  OBLASTI.forEach(o=>{
+    const div = document.createElement('div');
+    div.className = 'area-card';
+    div.onclick = ()=>div.classList.toggle('open');
+    let tHtml = o.teze.map(t=>`
+      <h4>${t.h}</h4>
+      <ul>${t.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    `).join('');
+    div.innerHTML = `
+      <div class="area-pct">Oblast ${o.id} · ${o.pct} ispita</div>
+      <div class="area-title">${o.naziv}</div>
+      <div class="area-sub">${o.sub}</div>
+      <div class="teze">${tHtml}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function buildGlossary() {
+  const g = document.getElementById('glossaryGrid');
+  POJMOVI.forEach(p=>{
+    const div = document.createElement('div');
+    div.style.cssText='background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem';
+    const oNaziv = OBLASTI.find(o=>o.id===p.o);
+    div.innerHTML=`
+      <div style="font-size:10px;color:var(--color-text-info);margin-bottom:6px">${oNaziv?oNaziv.naziv:p.o}</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary)">${p.p}</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">${p.d}</div>`;
+    g.appendChild(div);
+  });
+}
+
+buildAreas();
+buildGlossary();
+</script>
