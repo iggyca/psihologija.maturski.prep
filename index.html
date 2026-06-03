@@ -1,55 +1,85 @@
-<h2 class="sr-only">Interaktivna priprema za maturu iz psihologije – teze, sažeci i kviz po oblastima</h2>
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priprema za maturu - Psihologija</title>
+    <style>
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --color-background-primary: #ffffff;
+            --color-background-secondary: #f2f2f7;
+            --color-background-info: #e5f1ff;
+            --color-background-success: #e3f9e5;
+            --color-background-danger: #ffe5e5;
+            --color-text-primary: #1c1c1e;
+            --color-text-secondary: #3a3a3c;
+            --color-text-tertiary: #8e8e93;
+            --color-text-info: #007aff;
+            --color-text-success: #34c759;
+            --color-text-danger: #ff3b30;
+            --color-border-secondary: #d1d1d6;
+            --color-border-tertiary: #e5e5ea;
+            --color-border-info: #007aff;
+            --color-border-success: #34c759;
+            --color-border-danger: #ff3b30;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:var(--font-sans); background: #fbfbfd; color: var(--color-text-primary); padding: 0 1rem;}
+        .app{padding:1rem 0; max-width: 600px; margin: 0 auto;}
+        .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1rem}
+        .tab{padding:8px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-size:14px;color:var(--color-text-secondary);transition:all .15s; -webkit-tap-highlight-color: transparent;}
+        .tab.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
+        .tab:hover:not(.active){background:var(--color-background-secondary)}
+        .panel{display:none}.panel.active{display:block}
+        .area-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:1.5rem}
+        .area-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;cursor:pointer;transition:border-color .15s; -webkit-tap-highlight-color: transparent;}
+        .area-card:hover{border-color:var(--color-border-secondary)}
+        .area-card.open{border-color:var(--color-border-info)}
+        .area-title{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
+        .area-sub{font-size:12px;color:var(--color-text-secondary)}
+        .area-pct{font-size:12px;font-weight:500;color:var(--color-text-info);margin-top:6px}
+        .teze{display:none;margin-top:12px;border-top:0.5px solid var(--color-border-tertiary);padding-top:12px}
+        .area-card.open .teze{display:block}
+        .teze h4{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+        .teze ul{padding-left:1.2rem}
+        .teze li{font-size:13px;color:var(--color-text-primary);line-height:1.7;margin-bottom:4px}
+        .teze .key{font-weight:500;color:var(--color-text-info)}
+        .quiz-wrap{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem}
+        .quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        .quiz-header h3{font-size:16px;font-weight:500}
+        .progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.5rem}
+        .progress-fill{height:100%;background:var(--color-border-info);border-radius:2px;transition:width .3s}
+        .q-num{font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px}
+        .q-text{font-size:15px;line-height:1.6;margin-bottom:1.25rem;color:var(--color-text-primary)}
+        .options{display:flex;flex-direction:column;gap:8px}
+        .opt{padding:12px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:all .15s; -webkit-tap-highlight-color: transparent;}
+        .opt:hover:not(:disabled){background:var(--color-background-secondary)}
+        .opt.correct{background:var(--color-background-success);border-color:var(--color-border-success);color:var(--color-text-success)}
+        .opt.wrong{background:var(--color-background-danger);border-color:var(--color-border-danger);color:var(--color-text-danger)}
+        .feedback{margin-top:1rem;padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;display:none; line-height: 1.5;}
+        .feedback.show{display:block}
+        .feedback.ok{background:var(--color-background-success);color:var(--color-text-success);border: 0.5px solid var(--color-border-success);}
+        .feedback.nok{background:var(--color-background-danger);color:var(--color-text-danger);border: 0.5px solid var(--color-border-danger);}
+        .quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
+        .btn{padding:10px 20px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary); -webkit-tap-highlight-color: transparent;}
+        .btn:hover{background:var(--color-background-secondary)}
+        .btn-primary{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
+        .score-box{text-align:center;padding:2rem}
+        .score-big{font-size:48px;font-weight:500;color:var(--color-text-info)}
+        .score-label{font-size:14px;color:var(--color-text-secondary);margin-top:4px;margin-bottom:1.5rem}
+        .filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+        .filter-btn{padding:6px 14px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary); -webkit-tap-highlight-color: transparent;}
+        .filter-btn.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info)}
+        .area-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:8px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+        .sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    </style>
+</head>
+<body>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans)}
-.app{padding:1rem 0}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1rem}
-.tab{padding:7px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-size:14px;color:var(--color-text-secondary);transition:all .15s}
-.tab.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
-.tab:hover:not(.active){background:var(--color-background-secondary)}
-.panel{display:none}.panel.active{display:block}
-.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem}
-.area-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;cursor:pointer;transition:border-color .15s}
-.area-card:hover{border-color:var(--color-border-secondary)}
-.area-card.open{border-color:var(--color-border-info)}
-.area-title{font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
-.area-sub{font-size:12px;color:var(--color-text-secondary)}
-.area-pct{font-size:12px;font-weight:500;color:var(--color-text-info);margin-top:6px}
-.teze{display:none;margin-top:12px;border-top:0.5px solid var(--color-border-tertiary);padding-top:12px}
-.area-card.open .teze{display:block}
-.teze h4{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em}
-.teze ul{padding-left:1.2rem}
-.teze li{font-size:13px;color:var(--color-text-primary);line-height:1.7;margin-bottom:2px}
-.teze .key{font-weight:500;color:var(--color-text-info)}
-.quiz-wrap{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem}
-.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-.quiz-header h3{font-size:16px;font-weight:500}
-.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.5rem}
-.progress-fill{height:100%;background:var(--color-border-info);border-radius:2px;transition:width .3s}
-.q-num{font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px}
-.q-text{font-size:15px;line-height:1.6;margin-bottom:1.25rem;color:var(--color-text-primary)}
-.options{display:flex;flex-direction:column;gap:8px}
-.opt{padding:10px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:all .15s}
-.opt:hover:not(:disabled){background:var(--color-background-secondary)}
-.opt.correct{background:var(--color-background-success);border-color:var(--color-border-success);color:var(--color-text-success)}
-.opt.wrong{background:var(--color-background-danger);border-color:var(--color-border-danger);color:var(--color-text-danger)}
-.feedback{margin-top:1rem;padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;display:none}
-.feedback.show{display:block}
-.feedback.ok{background:var(--color-background-success);color:var(--color-text-success)}
-.feedback.nok{background:var(--color-background-danger);color:var(--color-text-danger)}
-.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
-.btn{padding:8px 20px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary)}
-.btn:hover{background:var(--color-background-secondary)}
-.btn-primary{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info);font-weight:500}
-.score-box{text-align:center;padding:2rem}
-.score-big{font-size:48px;font-weight:500;color:var(--color-text-info)}
-.score-label{font-size:14px;color:var(--color-text-secondary);margin-top:4px;margin-bottom:1.5rem}
-.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
-.filter-btn{padding:5px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary)}
-.filter-btn.active{background:var(--color-background-info);border-color:var(--color-border-info);color:var(--color-text-info)}
-.area-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:8px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
-</style>
+<h2 class="sr-only">Interaktivna priprema za maturu iz psihologije – teze, sažeci i kviz po oblastima</h2>
 
 <div class="app">
 <div class="tabs">
@@ -87,7 +117,7 @@ body{font-family:var(--font-sans)}
 </div>
 
 <div id="kljucni" class="panel">
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px" id="glossaryGrid"></div>
+  <div style="display:grid;grid-template-columns:1fr;gap:12px" id="glossaryGrid"></div>
 </div>
 </div>
 
@@ -214,7 +244,7 @@ const OBLASTI = [
         'Zrela ličnost po Fromu: produktivni karakter; Frojd: genitalni karakter'
       ]},
       {h:'Dinamika i mehanizmi odbrane', items:[
-        'Lični motivi: identitet, ljubav, poštovanje/ugled, postignuće, samopotvrđivanje',
+        'Lični motifs: identitet, ljubav, poštovanje/ugled, postignuće, samopotvrđivanje',
         'Mehanizmi odbrane (nesvjesni, smanjuju anksioznost): potiskivanje, projekcija, racionalizacija, sublimacija, reaktivna formacija, kompenzacija, regresija',
         'Reaktivna formacija = suprotno od željenog (nesvjesno); projekcija = pripisivanje drugima'
       ]},
@@ -333,10 +363,6 @@ function showTab(id) {
   event.target.classList.add('active');
 }
 
-function toggleCard(el) {
-  el.classList.toggle('open');
-}
-
 function setFilter(f, btn) {
   activeFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -441,3 +467,5 @@ function buildGlossary() {
 buildAreas();
 buildGlossary();
 </script>
+</body>
+</html>
